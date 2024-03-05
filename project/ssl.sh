@@ -1,12 +1,11 @@
 #!/bin/bash
 
 set -e
-. ../bash/source
+. ../bash/docker
+. ../bash/domains
+. ../bash/staging
 
-DOMAINS=('example.xyz' 'www.example.xyz') # your domains
-RSA_KEY_SIZE='4096' # can change
-IS_STAGING='true' # comment in production
-#EMAIL='your@email.here' # uncomment for use
+RSA_KEY_SIZE='4096'
 CERTBOT_PATH='./certbot/conf'
 STRING_DOMAINS="`sed 's/ /, /g' <<< "${DOMAINS[*]}"`"
 
@@ -16,6 +15,12 @@ echo '### SSL - Setup'
 	read -p '* Certbot path exists! Continue replacing? (y/N) '
 	[ "${REPLY,,}" != 'y' ] && exit 1
 } || mkdir -p "$CERTBOT_PATH/"
+
+read -p '* Admin email (blank for not use): '
+[ "$REPLY" ] && EMAIL="$REPLY"
+
+read -p "* RSA key size ($RSA_KEY_SIZE): "
+[ "$REPLY" ] && RSA_KEY_SIZE="$REPLY"
 
 SSL_NGINX_FILE="$CERTBOT_PATH/options-ssl-nginx.conf"
 SSL_DHPARAMS_FILE="$CERTBOT_PATH/ssl-dhparams.pem"
@@ -43,8 +48,8 @@ $DOCKER up -d --build nginx
 
 echo ">> Deleting dummy certificate for $STRING_DOMAINS..."
 for domain in "${DOMAINS[@]}"; do
-	rm -rf "$CERTBOT_PATH/live/$domain" && \
-	rm -rf "$CERTBOT_PATH/archive/$domain" && \
+	rm -rf "$CERTBOT_PATH/live/$domain"
+	rm -rf "$CERTBOT_PATH/archive/$domain"
 	rm -rf "$CERTBOT_PATH/renewal/$domain.conf"
 done
 
@@ -59,7 +64,7 @@ $DOCKER run --rm --entrypoint " \
 		--force-renewal \
 		$DOMAIN_ARGS \
 		"${IS_STAGING:+--staging}" \
-		"`[ -z "$EMAIL" ] && echo '--register-unsafely-without-email' || echo "--email $EMAIL"`" \
+		"`[ "$EMAIL" ] && echo "--email $EMAIL" || echo '--register-unsafely-without-email'`" \
 " certbot
 echo
 
