@@ -1,9 +1,9 @@
 #!/bin/bash
 
 set -e
-. ../bash/docker
-. ../bash/domains
-. ../bash/staging
+. '../source/docker'
+. '../source/domains'
+. '../source/staging'
 
 RSA_KEY_SIZE='4096'
 CERTBOT_PATH='./certbot/conf'
