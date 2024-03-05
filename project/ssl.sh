@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -e
+. ../bash/source
 
 DOMAINS=('example.xyz' 'www.example.xyz') # your domains
 RSA_KEY_SIZE='4096' # can change

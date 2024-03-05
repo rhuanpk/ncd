@@ -1,8 +1,8 @@
 #!/bin/bash
 
 set -e
-
 . ./bash/source
+
 [ "$UID" -ne '0' ] && SUDO='sudo'
 
 echo '### Nginx & Certbot with Docker - Setup'
