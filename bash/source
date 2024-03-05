@@ -1,0 +1,8 @@
+if ! dpkg -s 'docker-compose' &>/dev/null; then
+	DOCKER='docker-compose'
+elif ! dpkg -s 'docker-compose-plugin' &>/dev/null; then
+	DOCKER='docker compose'
+else
+	echo 'WARN: nothing docker compose version is installed'
+	exit 1
+fi
