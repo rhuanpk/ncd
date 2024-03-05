@@ -43,10 +43,9 @@ $DOCKER up -d --build nginx
 
 echo ">> Deleting dummy certificate for $STRING_DOMAINS..."
 for domain in "${DOMAINS[@]}"; do
-	CONF_PATH="$CERTBOT_PATH"
-	rm -rf "$CONF_PATH/live/$domain" && \
-	rm -rf "$CONF_PATH/archive/$domain" && \
-	rm -rf "$CONF_PATH/renewal/$domain.conf" \
+	rm -rf "$CERTBOT_PATH/live/$domain" && \
+	rm -rf "$CERTBOT_PATH/archive/$domain" && \
+	rm -rf "$CERTBOT_PATH/renewal/$domain.conf"
 done
 
 echo ">> Requesting Let's Encrypt certificate for $STRING_DOMAINS..."
