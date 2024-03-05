@@ -6,5 +6,5 @@ Sample repository that contains a minimal project with Nginx and Certbot running
 
 Run this command to automatic setup the project:
 ```sh
-curl 'https://raw.githubusercontent.com/rhuanpk/ncd/main/setup.sh' | bash -
+curl -fsSLo './setup.sh' 'https://raw.githubusercontent.com/rhuanpk/ncd/main/setup.sh' && bash './setup.sh'
 ```
