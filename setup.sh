@@ -12,7 +12,6 @@ cd './ncd/'
 
 SOURCE_DOMAINS='./source/domains'
 SOURCE_STAGING='./source/staging'
-
 NGINX_FILE='./project/nginx/default.conf'
 
 read -p '* Is production setup? (y/N) '
