@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 DOMAINS=('example.xyz' 'www.example.xyz') # your domains
 RSA_KEY_SIZE='4096' # can change
 IS_STAGING='true' # comment in production
