@@ -29,7 +29,20 @@ read -p '* Is production setup? (y/N) '
 	echo '>> Setting up local domains...'
 	echo "DOMAINS=('ncd.xyz' 'www.ncd.xyz')" >> "$SOURCE_DOMAINS"
 	. "$SOURCE_DOMAINS"
-	$SUDO echo $'\n# Only tests\n127.0.0.1\tncd.xyz\n127.0.0.1\twww.ncd.xyz' >> '/etc/hosts'
+	sudo -k 2>&-
+	read -sp '* User password: '; echo
+	OUTPUT="`echo -e "${REPLY}\n" | sudo -Sv 2>&1`"
+	EXIT="$?"
+	[[ "$EXIT" -ne '0' && ! "$OUTPUT" =~ incorrect\ password ]] && {
+		while :; do
+			echo -n '* [ROOT] '
+			if su - -c "echo $'\n# Only tests\n127.0.0.1\tncd.xyz\n127.0.0.1\twww.ncd.xyz' >> '/etc/hosts'"; then break; fi
+		done
+	} || {
+		while :; do
+			if $SUDO tee -a '/etc/hosts' >'/dev/null' <<< $'\n# Only tests\n127.0.0.1\tncd.xyz\n127.0.0.1\twww.ncd.xyz'; then break; fi
+		done
+	}
 }
 
 echo '>> Setting up domains in config files...'
