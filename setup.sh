@@ -48,7 +48,7 @@ STRING_DOMAINS="${DOMAINS[@]}"
 sed -i "s|#!SERVERNAMES!#|server_name $STRING_DOMAINS;|" "$NGINX_FILE"
 MAPPED_DOMAINS="default\t$DOMAINS;\n"
 for domain in "${DOMAINS[@]}"; do
-	MAPPED_DOMAINS+="$domain\t$domain;\n"
+	MAPPED_DOMAINS+="\t$domain\t$domain;\n"
 done
 sed -i "s~#!DOMAINS!#~${MAPPED_DOMAINS%\\n}~" "$NGINX_FILE"
 
