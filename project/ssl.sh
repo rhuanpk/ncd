@@ -62,8 +62,8 @@ $DOCKER run --rm --entrypoint " \
 		--agree-tos \
 		--force-renewal \
 		$DOMAIN_ARGS \
-		"${IS_STAGING:+--staging}" \
-		"`[ "$EMAIL" ] && echo "--email $EMAIL" || echo '--register-unsafely-without-email'`" \
+		${IS_STAGING:+--staging} \
+		`[ "$EMAIL" ] && echo "--email $EMAIL" || echo '--register-unsafely-without-email'` \
 " certbot
 
 echo ">> Restarting Nginx container..."
