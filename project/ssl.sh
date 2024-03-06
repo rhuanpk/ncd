@@ -65,7 +65,6 @@ $DOCKER run --rm --entrypoint " \
 		"${IS_STAGING:+--staging}" \
 		"`[ "$EMAIL" ] && echo "--email $EMAIL" || echo '--register-unsafely-without-email'`" \
 " certbot
-echo
 
 echo ">> Restarting Nginx container..."
 $DOCKER exec nginx nginx -s reload
