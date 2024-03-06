@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 echo '### Nginx & Certbot with Docker - Setup'
 
 echo '>> Cloning base repository...'

@@ -1,6 +1,5 @@
 #!/bin/bash
 
-set -e
 . '../source/docker'
 . '../source/domains'
 . '../source/staging'
