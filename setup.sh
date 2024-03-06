@@ -19,7 +19,7 @@ read -p '* Is production setup? (y/N) '
 [ -z "$IS_STAGING" ] && {
 	read -p '* Domains (blank space separate domains): ' -a DOMAINS
 	for domain in "${DOMAINS[@]}"; do
-		CONCAT+="'$i' "
+		CONCAT+="'$domain' "
 	done
 	echo "DOMAINS=(${CONCAT% })" >> "$SOURCE_DOMAINS"
 } || {
