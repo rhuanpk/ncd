@@ -54,7 +54,7 @@ sed -i "s~#!DOMAINS!#~${MAPPED_DOMAINS%\\n}~" "$NGINX_FILE"
 
 echo '>> Executing SSL script setup...'
 cd './project/'
-bash ./ssl.sh
+if ! ./ssl.sh; then exit; fi
 
 echo '>> Executing docker-compose file...'
 $DOCKER up -d
