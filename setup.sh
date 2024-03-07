@@ -45,7 +45,7 @@ read -p '* Is production setup? (y/N) '
 echo '>> Setting up config files...'
 STRING_DOMAINS="${DOMAINS[@]}"
 sed -i "s|#!SERVERNAMES!#|server_name $STRING_DOMAINS;|" './project/nginx/default.conf'
-sed -i "s|#!COMMONNAME!#|$DOMAINS|" "$NGINX_FILE"
+sed -i "s|#!COMMONNAME!#|$DOMAINS|" './project/ssl.sh'
 
 echo '>> Executing SSL script setup...'
 cd './project/'
