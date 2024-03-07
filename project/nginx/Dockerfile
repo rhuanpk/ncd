@@ -1,14 +1,12 @@
 FROM alpine:latest as builder
 
-RUN apk add --no-cache \
-	build-base \
-	pcre-dev \
-	zlib-dev \
-	openssl-dev \
-	libxslt-dev \
-	gd-dev \
-	geoip-dev \
-	curl
+RUN apk --update \
+	add -u --no-cache \
+		build-base \
+		pcre-dev \
+		zlib-dev \
+		openssl-dev \
+		curl
 
 RUN wget -qO nginx.tar.gz "$( \
 		curl -fsL 'https://nginx.org/en/download.html' \
@@ -18,13 +16,16 @@ RUN wget -qO nginx.tar.gz "$( \
 		| tail -1 \
 	)" \
 	&& tar -zxvf nginx.tar.gz \
-	&& cd nginx-*
-
-RUN ./configure --with-stream --with-stream_ssl_preread_module \
+	&& cd nginx-* \
+	&& ./configure \
+		--with-stream \
+		--with-stream_ssl_preread_module \
 	&& make \
 	&& make install
 
 FROM nginx:alpine
+
+RUN apk --update add --no-cache pcre-dev
 
 COPY --from=builder /usr/local/nginx/sbin/nginx /usr/sbin/nginx
 
