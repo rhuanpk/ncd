@@ -20,12 +20,18 @@ RUN wget -qO nginx.tar.gz "$( \
 	&& ./configure \
 		--with-stream \
 		--with-stream_ssl_preread_module \
+		--with-http_ssl_module \
 	&& make \
 	&& make install
 
 FROM nginx:alpine
 
 RUN apk --update add --no-cache pcre-dev
+
+RUN mkdir -p /usr/local/nginx/conf \
+	&& mkdir -p /usr/local/nginx/logs \
+	&& ln -s /etc/nginx/nginx.conf /usr/local/nginx/conf/ \
+	&& touch /usr/local/nginx/logs/error.log
 
 COPY --from=builder /usr/local/nginx/sbin/nginx /usr/sbin/nginx
 
