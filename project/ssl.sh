@@ -43,7 +43,7 @@ for domain in "${DOMAINS[@]}"; do
 done
 
 echo '>> Starting Nginx container...'
-$DOCKER up -d --build nginx
+$DOCKER up -d --build --force-recreate nginx
 
 echo ">> Deleting dummy certificate for $STRING_DOMAINS..."
 for domain in "${DOMAINS[@]}"; do
