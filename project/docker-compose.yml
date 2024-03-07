@@ -1,5 +1,7 @@
 version: '3.8'
+
 services:
+
   nginx:
     image: nginx:alpine
     volumes:
@@ -10,6 +12,7 @@ services:
     ports:
       - 80:80
       - 443:443
+
   certbot:
     image: certbot/certbot
     volumes:
