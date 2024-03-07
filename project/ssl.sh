@@ -38,7 +38,7 @@ for domain in "${DOMAINS[@]}"; do
 		openssl req -x509 -nodes -newkey rsa:$RSA_KEY_SIZE -days 1 \
 			-keyout '$DOMAIN_PATH/privkey.pem' \
 			-out '$DOMAIN_PATH/fullchain.pem' \
-			-subj '/CN=localhost' \
+			-subj '/CN=#!COMMONNAME!#' \
 	" certbot
 done
 

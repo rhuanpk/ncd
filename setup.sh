@@ -10,7 +10,6 @@ cd './ncd/'
 
 SOURCE_DOMAINS='./source/domains'
 SOURCE_STAGING='./source/staging'
-NGINX_FILE='./project/nginx/default.conf'
 
 read -p '* Is production setup? (y/N) '
 [ "${REPLY,,}" != 'y' ] && echo "IS_STAGING='true'" >> "$SOURCE_STAGING"
@@ -43,14 +42,10 @@ read -p '* Is production setup? (y/N) '
 	}
 }
 
-echo '>> Setting up domains in config files...'
+echo '>> Setting up config files...'
 STRING_DOMAINS="${DOMAINS[@]}"
-sed -i "s|#!SERVERNAMES!#|server_name $STRING_DOMAINS;|" "$NGINX_FILE"
-MAPPED_DOMAINS="default\t$DOMAINS;\n"
-for domain in "${DOMAINS[@]}"; do
-	MAPPED_DOMAINS+="\t$domain\t$domain;\n"
-done
-sed -i "s~#!DOMAINS!#~${MAPPED_DOMAINS%\\n}~" "$NGINX_FILE"
+sed -i "s|#!SERVERNAMES!#|server_name $STRING_DOMAINS;|" './project/nginx/default.conf'
+sed -i "s|#!COMMONNAME!#|$DOMAINS|" "$NGINX_FILE"
 
 echo '>> Executing SSL script setup...'
 cd './project/'
