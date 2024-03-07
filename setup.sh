@@ -10,7 +10,7 @@ cd './ncd/'
 
 SOURCE_DOMAINS='./source/domains'
 SOURCE_STAGING='./source/staging'
-NGINX_FILE='./project/nginx/default.conf'
+NGINX_FILE='./project/nginx/config/default.conf'
 
 read -p '* Is production setup? (y/N) '
 [ "${REPLY,,}" != 'y' ] && echo "IS_STAGING='true'" >> "$SOURCE_STAGING"

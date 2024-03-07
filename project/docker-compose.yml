@@ -3,9 +3,9 @@ version: '3.8'
 services:
 
   nginx:
-    image: nginx:alpine
+    build: ./nginx/
     volumes:
-      - ./nginx:/etc/nginx/conf.d:ro
+      - ./nginx/config:/etc/nginx/conf.d:ro
       - ./certbot/conf:/etc/letsencrypt:ro
       - ./certbot/www:/var/www/certbot:ro
       - ./site:/var/www/html:ro # this static or specific frontend service
