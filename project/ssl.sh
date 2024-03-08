@@ -13,13 +13,16 @@ echo '### SSL - Setup'
 [ -d "$CERTBOT_PATH/" ] && {
 	read -p '* Certbot path exists! Continue replacing? (y/N) '
 	[ "${REPLY,,}" != 'y' ] && exit 1
-} || mkdir -p "$CERTBOT_PATH/"
+}
 
 read -p '* Admin email (blank for not use): '
 [ "$REPLY" ] && EMAIL="$REPLY"
 
 read -p "* RSA key size ($RSA_KEY_SIZE): "
 [ "$REPLY" ] && RSA_KEY_SIZE="$REPLY"
+
+echo '>> Creating necessary folders...'
+mkdir -p ./certbot/{conf,www}/
 
 SSL_NGINX_FILE="$CERTBOT_PATH/options-ssl-nginx.conf"
 SSL_DHPARAMS_FILE="$CERTBOT_PATH/ssl-dhparams.pem"
