@@ -1,0 +1,4 @@
+# this static or a specific proxy location
+location / {
+	root /var/www/html;
+}

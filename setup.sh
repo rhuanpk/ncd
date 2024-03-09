@@ -53,9 +53,29 @@ read -p '* Is production setup? (y/N) '
 echo '>> Setting up config files...'
 STRING_DOMAINS="${DOMAINS[@]}"
 sed -i "s|#!SERVERNAMES!#|server_name $STRING_DOMAINS;|" "$NGINX_FOLDER"/*
-mkdir -p "$NGINX_FOLDER/conf/"
 cd "$NGINX_FOLDER/conf/"
 cp -f '../pre.conf' './default.conf'
+for domain in "${DOMAINS[@]}"; do
+cat << EOF >> '../post.conf'
+
+server {
+
+	listen      443 ssl;
+	listen [::]:443 ssl;
+	server_name $domain;
+
+    include /etc/nginx/conf.d/global.conf;
+    include /etc/nginx/conf.d/global.locations;
+    include /etc/nginx/conf.d/$domain/ssl.conf;
+
+}
+
+EOF
+mkdir "./$domain/"
+cat <<- EOF > "./$domain/ssl.conf"
+	ssl_certificate /etc/letsencrypt/live/$domain/fullchain.pem;
+	ssl_certificate_key /etc/letsencrypt/live/$domain/privkey.pem;
+done
 cd "$OLDPWD"
 
 echo '>> Executing SSL script setup...'
