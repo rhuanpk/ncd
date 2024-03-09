@@ -18,6 +18,7 @@ cd './ncd/'
 
 SOURCE_DOMAINS='./source/domains'
 SOURCE_STAGING='./source/staging'
+NGINX_FOLDER='./project/nginx'
 
 read -p '* Is production setup? (y/N) '
 [ "${REPLY,,}" != 'y' ] && echo "IS_STAGING='true'" >> "$SOURCE_STAGING"
@@ -51,12 +52,12 @@ read -p '* Is production setup? (y/N) '
 
 echo '>> Setting up config files...'
 STRING_DOMAINS="${DOMAINS[@]}"
-sed -i "s|#!SERVERNAMES!#|server_name $STRING_DOMAINS;|" './project/nginx/default.conf'
-sed -i "s|#!COMMONNAME!#|$DOMAINS|" './project/ssl.sh'
+sed -i "s|#!SERVERNAMES!#|server_name $STRING_DOMAINS;|" "$NGINX_FOLDER"/*
+mkdir -p "$NGINX_FOLDER/conf/"
+cd "$NGINX_FOLDER/conf/"
+ln -sf '../pre.conf' './default.conf'
+cd "$OLDPWD"
 
 echo '>> Executing SSL script setup...'
 cd './project/'
-if ! ./ssl.sh; then exit; fi
-
-echo '>> Executing docker-compose file...'
-$DOCKER up -d
+./ssl.sh

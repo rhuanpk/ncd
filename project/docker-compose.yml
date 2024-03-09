@@ -5,7 +5,7 @@ services:
   nginx:
     image: nginx:alpine
     volumes:
-      - ./nginx:/etc/nginx/conf.d:ro
+      - ./nginx/conf:/etc/nginx/conf.d:ro
       - ./certbot/conf:/etc/letsencrypt:ro
       - ./certbot/www:/var/www/certbot:ro
       - ./site:/var/www/html:ro # this static or specific frontend service

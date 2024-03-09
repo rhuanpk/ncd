@@ -4,59 +4,22 @@
 . '../source/domains'
 . '../source/staging'
 
-ECDSA_CURVE='prime256v1'
-CERTBOT_PATH='./certbot/conf'
-STRING_DOMAINS="`sed 's/ /, /g' <<< "${DOMAINS[*]}"`"
+CERTBOT_CONF='./certbot/conf'
 
 echo '### SSL - Setup'
-
-[ -d "$CERTBOT_PATH/" ] && {
-	read -p '* Certbot path exists! Continue replacing? (y/N) '
-	[ "${REPLY,,}" != 'y' ] && exit 1
-}
 
 read -p '* Admin email (blank for not use): '
 [ "$REPLY" ] && EMAIL="$REPLY"
 
-read -p "* ECDSA curve param ($ECDSA_CURVE): "
-[ "$REPLY" ] && ECDSA_CURVE="$REPLY"
-
 echo '>> Creating necessary folders...'
 mkdir -p ./certbot/{conf,www}/
 
-SSL_NGINX_FILE="$CERTBOT_PATH/options-ssl-nginx.conf"
-SSL_DHPARAMS_FILE="$CERTBOT_PATH/ssl-dhparams.pem"
-[[ ! -f "$SSL_NGINX_FILE" || ! -f "$SSL_DHPARAMS_FILE" ]] && {
-	echo '>> Downloading recommended files...'
-	URL_PART='https://raw.githubusercontent.com/certbot/certbot/master'
-	curl -fsSLo "$SSL_NGINX_FILE" "$URL_PART/certbot-nginx/certbot_nginx/_internal/tls_configs/options-ssl-nginx.conf"
-	curl -fsSLo "$SSL_DHPARAMS_FILE" "$URL_PART/certbot/certbot/ssl-dhparams.pem"
-}
-
-echo ">> Creating dummy certificate for $STRING_DOMAINS..."
-for domain in "${DOMAINS[@]}"; do
-	mkdir -p "$CERTBOT_PATH/live/$domain/"
-	DOMAIN_PATH="/etc/letsencrypt/live/$domain"
-	$DOCKER run --rm --entrypoint " \
-		openssl req -x509 -nodes -days '1' \
-			-keyout '$DOMAIN_PATH/privkey.pem' \
-			-out '$DOMAIN_PATH/fullchain.pem' \
-			-subj '/CN=#!COMMONNAME!#' \
-			-newkey 'ec' -pkeyopt 'ec_paramgen_curve:$ECDSA_CURVE' \
-	" certbot
-done
-
+# step 1 - start nginx with sample http config
 echo '>> Starting Nginx container...'
 $DOCKER up -d --build --force-recreate nginx
 
-echo ">> Deleting dummy certificate for $STRING_DOMAINS..."
-for domain in "${DOMAINS[@]}"; do
-	rm -rf "$CERTBOT_PATH/live/$domain"
-	rm -rf "$CERTBOT_PATH/archive/$domain"
-	rm -rf "$CERTBOT_PATH/renewal/$domain.conf"
-done
-
-echo ">> Requesting Let's Encrypt certificate for $STRING_DOMAINS..."
+# step 2 - request let's encrypt certificate
+echo ">> Requesting Let's Encrypt certificate for `sed 's/ /, /g' <<< "${DOMAINS[*]}"`..."
 for domain in "${DOMAINS[@]}"; do
 	DOMAIN_ARGS+="-d '$domain' "
 done
@@ -69,5 +32,20 @@ $DOCKER run --rm --entrypoint " \
 		`[ "$EMAIL" ] && echo "--email $EMAIL" || echo '--register-unsafely-without-email'` \
 " certbot
 
+# step 3 - download nginx recommended files
+SSL_NGINX_FILE="$CERTBOT_CONF/options-ssl-nginx.conf"
+SSL_DHPARAMS_FILE="$CERTBOT_CONF/ssl-dhparams.pem"
+[[ ! -f "$SSL_NGINX_FILE" || ! -f "$SSL_DHPARAMS_FILE" ]] && {
+	echo '>> Downloading recommended files...'
+	URL_PART='https://raw.githubusercontent.com/certbot/certbot/master'
+	curl -fsSLo "$SSL_NGINX_FILE" "$URL_PART/certbot-nginx/certbot_nginx/_internal/tls_configs/options-ssl-nginx.conf"
+	curl -fsSLo "$SSL_DHPARAMS_FILE" "$URL_PART/certbot/certbot/ssl-dhparams.pem"
+}
+
+# step 4 - change nginx config file for https redirect
+echo '>> Changing nginx config file...'
+ln -sf '../post.conf' './default.conf'
+
+# step 5 - reload nginx container
 echo ">> Restarting Nginx container..."
 $DOCKER exec nginx nginx -s reload
