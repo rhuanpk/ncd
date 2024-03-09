@@ -52,7 +52,7 @@ read -p '* Is production setup? (y/N) '
 
 echo '>> Setting up config files...'
 STRING_DOMAINS="${DOMAINS[@]}"
-sed -i "s|#!SERVERNAMES!#|server_name $STRING_DOMAINS;|" "$NGINX_FOLDER"/*
+find "$NGINX_FOLDER/" -maxdepth 1 -type f -exec sed -i "s|#!SERVERNAMES!#|server_name $STRING_DOMAINS;|" '{}' \+
 cd "$NGINX_FOLDER/conf/"
 cp -f '../pre.conf' './default.conf'
 for domain in "${DOMAINS[@]}"; do
@@ -75,6 +75,7 @@ mkdir "./$domain/"
 cat <<- EOF > "./$domain/ssl.conf"
 	ssl_certificate /etc/letsencrypt/live/$domain/fullchain.pem;
 	ssl_certificate_key /etc/letsencrypt/live/$domain/privkey.pem;
+EOF
 done
 cd "$OLDPWD"
 
