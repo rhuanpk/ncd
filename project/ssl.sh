@@ -44,7 +44,9 @@ SSL_DHPARAMS_FILE="$CERTBOT_CONF/ssl-dhparams.pem"
 
 # step 4 - change nginx config file for https redirect
 echo '>> Changing nginx config file...'
+cd './nginx/conf/'
 cp -f '../post.conf' './default.conf'
+cd "$OLDPWD"
 
 # step 5 - reload nginx container
 echo ">> Restarting Nginx container..."
