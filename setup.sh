@@ -64,9 +64,9 @@ server {
 	listen [::]:443 ssl;
 	server_name $domain;
 
-    include /etc/nginx/conf.d/global.conf;
-    include /etc/nginx/conf.d/global.locations;
-    include /etc/nginx/conf.d/$domain/ssl.conf;
+	include /etc/nginx/conf.d/global.conf;
+	include /etc/nginx/conf.d/global.locations;
+	include /etc/nginx/conf.d/$domain/ssl.conf;
 
 }
 
