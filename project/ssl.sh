@@ -4,7 +4,7 @@
 . '../source/domains'
 . '../source/staging'
 
-RSA_KEY_SIZE='4096'
+ECDSA_CURVE='prime256v1'
 CERTBOT_PATH='./certbot/conf'
 STRING_DOMAINS="`sed 's/ /, /g' <<< "${DOMAINS[*]}"`"
 
@@ -18,8 +18,8 @@ echo '### SSL - Setup'
 read -p '* Admin email (blank for not use): '
 [ "$REPLY" ] && EMAIL="$REPLY"
 
-read -p "* RSA key size ($RSA_KEY_SIZE): "
-[ "$REPLY" ] && RSA_KEY_SIZE="$REPLY"
+read -p "* ECDSA curve param ($ECDSA_CURVE): "
+[ "$REPLY" ] && ECDSA_CURVE="$REPLY"
 
 echo '>> Creating necessary folders...'
 mkdir -p ./certbot/{conf,www}/
@@ -38,10 +38,11 @@ for domain in "${DOMAINS[@]}"; do
 	mkdir -p "$CERTBOT_PATH/live/$domain/"
 	DOMAIN_PATH="/etc/letsencrypt/live/$domain"
 	$DOCKER run --rm --entrypoint " \
-		openssl req -x509 -nodes -newkey rsa:$RSA_KEY_SIZE -days 1 \
+		openssl req -x509 -nodes -days '1' \
 			-keyout '$DOMAIN_PATH/privkey.pem' \
 			-out '$DOMAIN_PATH/fullchain.pem' \
 			-subj '/CN=#!COMMONNAME!#' \
+			-newkey 'ec' -pkeyopt 'ec_paramgen_curve:$ECDSA_CURVE' \
 	" certbot
 done
 
@@ -61,9 +62,8 @@ for domain in "${DOMAINS[@]}"; do
 done
 $DOCKER run --rm --entrypoint " \
 	certbot certonly --webroot -w /var/www/certbot \
-		--rsa-key-size $RSA_KEY_SIZE \
+		--key-type ecdsa \
 		--agree-tos \
-		--force-renewal \
 		$DOMAIN_ARGS \
 		${IS_STAGING:+--staging} \
 		`[ "$EMAIL" ] && echo "--email $EMAIL" || echo '--register-unsafely-without-email'` \
