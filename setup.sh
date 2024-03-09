@@ -55,7 +55,7 @@ STRING_DOMAINS="${DOMAINS[@]}"
 sed -i "s|#!SERVERNAMES!#|server_name $STRING_DOMAINS;|" "$NGINX_FOLDER"/*
 mkdir -p "$NGINX_FOLDER/conf/"
 cd "$NGINX_FOLDER/conf/"
-ln -sf '../pre.conf' './default.conf'
+cp -f '../pre.conf' './default.conf'
 cd "$OLDPWD"
 
 echo '>> Executing SSL script setup...'
