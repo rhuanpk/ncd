@@ -4,6 +4,7 @@
 . '../source/domains'
 . '../source/staging'
 
+SOURCE_CERT='../source/cert'
 CERTBOT_CONF='./certbot/conf'
 
 echo '### SSL - Setup'
@@ -28,8 +29,9 @@ $DOCKER run --rm --entrypoint " \
 		--key-type ecdsa \
 		--agree-tos \
 		$DOMAIN_ARGS \
-		${IS_STAGING:+--staging} \
+		${IS_STAGING:+--dry-run} \
 		`[ "$EMAIL" ] && echo "--email $EMAIL" || echo '--register-unsafely-without-email'` \
+		`cat "$SOURCE_CERT"` \
 " certbot
 
 # step 3 - download nginx recommended files
@@ -44,9 +46,7 @@ SSL_DHPARAMS_FILE="$CERTBOT_CONF/ssl-dhparams.pem"
 
 # step 4 - change nginx config file for https redirect
 echo '>> Changing nginx config file...'
-cd './nginx/conf/'
-cp -f '../post.conf' './default.conf'
-cd "$OLDPWD"
+cp -f './nginx/post.conf' './nginx/conf/default.conf'
 
 # step 5 - reload nginx container
 echo ">> Restarting Nginx container..."
