@@ -57,7 +57,7 @@ read -p '* Generate single certificate? (Y/n) '
 . "$SOURCE_SINGLE" 2>&-
 
 echo '>> Setting up config files...'
-if "$IS_SINGLE"; then
+if "${IS_SINGLE:-false}"; then
 cat << EOF >> "$NGINX_FOLDER/post.conf"
 
 server {
