@@ -2,7 +2,7 @@
 
 . '../source/docker'
 . '../source/domains'
-. '../source/staging'
+. '../source/staging' 2>&-
 
 SOURCE_CERT='../source/cert'
 CERTBOT_CONF='./certbot/conf'

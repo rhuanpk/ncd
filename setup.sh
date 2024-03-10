@@ -24,7 +24,7 @@ NGINX_FOLDER='./project/nginx'
 
 read -p '* Is production setup? (y/N) '
 [ "${REPLY,,}" != 'y' ] && echo "IS_STAGING='true'" > "$SOURCE_STAGING"
-. "$SOURCE_STAGING"
+. "$SOURCE_STAGING" 2>&-
 
 [ -z "$IS_STAGING" ] && {
 	setup-domains-array
@@ -54,7 +54,7 @@ read -p '* Is production setup? (y/N) '
 
 read -p '* Generate single certificate? (Y/n) '
 [ "${REPLY,,}" != 'n' ] && echo "IS_SINGLE='true'" > "$SOURCE_SINGLE"
-. "$SOURCE_SINGLE"
+. "$SOURCE_SINGLE" 2>&-
 
 echo '>> Setting up config files...'
 if "$IS_SINGLE"; then
