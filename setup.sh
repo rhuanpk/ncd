@@ -80,12 +80,19 @@ server {
 EOF
 else
 	for domain in "${DOMAINS[@]}"; do
-		[ "`tr -d ' ' <<< "$GROUP"`" = "${domain#www.}" ] && {
-			GROUPS+=("$GROUP$domain")
-			uset GROUP
-		} || GROUP="$domain "
+		echo "$domain"
+		[ "${PREVIOUS_DOMAIN#www.}" = "${domain#www.}" ] && {
+			DOMAINS_GROUPS+=("$PREVIOUS_DOMAIN $domain")
+		} || {
+			[[ -z "$PREVIOUS_DOMAIN" || "$domain" =~ ^www\. ]] && {
+				PREVIOUS_DOMAIN="$domain"
+				continue
+			}
+			DOMAINS_GROUPS+=("$domain")
+		}
+		PREVIOUS_DOMAIN="$domain"
 	done
-	for group in "${GROUPS[@]}"; do
+	for group in "${DOMAINS_GROUPS[@]}"; do
 		SHORTED="$(cut -d ' ' -f '1' <<< "$group" | sed 's/^www.//')"
 		CERT_OPTIONS="--cert-name '$SHORTED'" > "$SOURCE_CERT"
 cat << EOF >> "$NGINX_FOLDER/post.conf"
