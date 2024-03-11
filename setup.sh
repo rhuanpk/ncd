@@ -81,7 +81,6 @@ server {
 EOF
 else
 	for domain in "${DOMAINS[@]}"; do
-		echo "$domain"
 		[ "${PREVIOUS_DOMAIN#www.}" = "${domain#www.}" ] && {
 			DOMAINS_GROUPS+=("$PREVIOUS_DOMAIN $domain")
 		} || {
@@ -98,7 +97,7 @@ else
 	for group in "${DOMAINS_GROUPS[@]}"; do
 		CONCAT+="'$group' "
 		SHORTED="$(cut -d ' ' -f '1' <<< "$group" | sed 's/^www.//')"
-		CERT_OPTIONS="--cert-name '$SHORTED'" >> "$SOURCE_CERT"
+		echo "--cert-name '$SHORTED'" >> "$SOURCE_CERT"
 cat << EOF >> "$NGINX_FOLDER/post.conf"
 
 server {

@@ -6,7 +6,7 @@
 . '../source/staging' 2>&-
 
 SOURCE_CERT='../source/cert'
-SOURCE_GROUPS='./source/groups'
+SOURCE_GROUPS='../source/groups'
 CERTBOT_CONF='./certbot/conf'
 
 echo '### SSL - Setup'
