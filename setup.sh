@@ -18,6 +18,7 @@ cd './ncd/'
 
 SOURCE_CERT='./source/cert'
 SOURCE_DOMAINS='./source/domains'
+SOURCE_GROUPS='./source/groups'
 SOURCE_SINGLE='./source/single'
 SOURCE_STAGING='./source/staging'
 NGINX_FOLDER='./project/nginx'
@@ -92,9 +93,12 @@ else
 		}
 		PREVIOUS_DOMAIN="$domain"
 	done
+	unset CONCAT
+	rm -f "$SOURCE_CERT"
 	for group in "${DOMAINS_GROUPS[@]}"; do
+		CONCAT+="'$group' "
 		SHORTED="$(cut -d ' ' -f '1' <<< "$group" | sed 's/^www.//')"
-		CERT_OPTIONS="--cert-name '$SHORTED'" > "$SOURCE_CERT"
+		CERT_OPTIONS="--cert-name '$SHORTED'" >> "$SOURCE_CERT"
 cat << EOF >> "$NGINX_FOLDER/post.conf"
 
 server {
@@ -115,6 +119,7 @@ EOF
 			ssl_certificate_key /etc/letsencrypt/live/$SHORTED/privkey.pem;
 		EOF
 	done
+	echo "DOMAINS_GROUPS=(${CONCAT% })" > "$SOURCE_GROUPS"
 fi
 STRING_DOMAINS="${DOMAINS[@]}"
 find "$NGINX_FOLDER/" -maxdepth 1 -type f -exec sed -i "s|#!SERVERNAMES!#|server_name $STRING_DOMAINS;|" '{}' \+
