@@ -27,7 +27,7 @@ for status in `git status --porcelain | sed -n 's/^.\(.\).*$/\1/;{/^\(M\|\?\)/p}
 					if EXITS=$(
 						su - -c " \
 							cd \"`pwd`\"; \
-							for file in \`find ./project/certbot/ -type d -user 0\`; do \
+							for file in \`find ./project/certbot/ ./project/nginx/conf/ -type d -user 0\`; do \
 								chown -R 1000:1000 \"\$file\"; \
 								echo \"#@\$?@#\"; \
 							done \
@@ -41,7 +41,7 @@ for status in `git status --porcelain | sed -n 's/^.\(.\).*$/\1/;{/^\(M\|\?\)/p}
 				while :; do
 					IS_SUDO=true
 					unset EXITS
-					for file in `find ./project/certbot/ -type d -user 0`; do
+					for file in `find ./project/certbot/ ./project/nginx/conf/ -type d -user 0`; do
 						sudo chown -R 1000:1000 "$file"
 						EXITS+="$?"
 					done
@@ -49,7 +49,7 @@ for status in `git status --porcelain | sed -n 's/^.\(.\).*$/\1/;{/^\(M\|\?\)/p}
 					if ! "${HAS_ERROR:-false}"; then break; fi
 				done
 			fi
-			git clean -f ./project/certbot/
+			git clean -f 'project/certbot/' 'project/nginx/conf/' 'source/'
 			if "${HAS_ERROR:-false}"; then
 				echo '! Some error occurred, try on your own: git clean -f ./'
 				exit 1
