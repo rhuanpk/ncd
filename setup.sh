@@ -12,9 +12,55 @@ echo '### Nginx & Certbot with Docker - Setup'
 
 echo '>> Cloning base repository...'
 git clone -q 'https://github.com/rhuanpk/ncd.git'
+sed -i 's/^git clone/#&/' "$0"
 cd './ncd/'
-
-. './source/docker'
+for status in `git status --porcelain | sed -n 's/^.\(.\).*$/\1/;{/^\(M\|\?\)/p}' | sort -u`; do
+	[[ "$status" = '?' && -d './project/certbot/conf/live/' ]] && {
+		read -p '* Certs already exists, gens in different way (delete existing)? (y/N) '
+		[ "${REPLY,,}" = 'y' ] && {
+			sudo -k 2>&-
+			read -sp '* User password: '; echo
+			if ! OUTPUT="`echo -e "${REPLY}\n" | sudo -Sv 2>&1`" && [[ ! "$OUTPUT" =~ incorrect\ password ]]; then
+				while :; do
+					unset EXITS
+					echo -n '* [ROOT] '
+					if EXITS=$(
+						su - -c " \
+							cd \"`pwd`\"; \
+							for file in \`find ./project/certbot/ -type d -user 0\`; do \
+								chown -R 1000:1000 \"\$file\"; \
+								echo \"#@\$?@#\"; \
+							done \
+						"
+					); then
+						break
+					fi
+					[[ "`sed -n 's/^.*#@\([[:digit:]]\+\)@#.*$/\1/pg' <<< "$EXITS" | tr -d '\n'`" =~ [^0] ]] && HAS_ERROR=true
+				done
+			else
+				while :; do
+					IS_SUDO=true
+					unset EXITS
+					for file in `find ./project/certbot/ -type d -user 0`; do
+						sudo chown -R 1000:1000 "$file"
+						EXITS+="$?"
+					done
+					[[ "$EXITS" =~ [^0] ]] && HAS_ERROR=true
+					if ! "${HAS_ERROR:-false}"; then break; fi
+				done
+			fi
+			git clean -f ./project/certbot/
+			if "${HAS_ERROR:-false}"; then
+				echo '! Some error occurred, try on your own: git clean -f ./'
+				exit 1
+			fi
+		}
+	}
+	[ "$status" = 'M' ] && {
+		read -p '* Config files are modified, reset? (Y/n) '
+		[ "${REPLY,,}" != 'n' ] && git restore --worktree ./
+	}
+done
 
 SOURCE_CERT='./source/cert'
 SOURCE_DOMAINS='./source/domains'
@@ -32,24 +78,25 @@ read -p '* Is production setup? (y/N) '
 } || {
 	read -p '* Is local test? (Y/n) '
 	[ "${REPLY,,}" != 'n' ] && {
-		[ "$UID" -ne '0' ] && SUDO='sudo'
 		echo '>> Setting up local domains...'
 		echo "DOMAINS=('ncd.xyz' 'www.ncd.xyz')" > "$SOURCE_DOMAINS"
 		. "$SOURCE_DOMAINS"
 		sudo -k 2>&-
 		read -sp '* User password: '; echo
-		OUTPUT="`echo -e "${REPLY}\n" | sudo -Sv 2>&1`"
-		EXIT="$?"
-		[[ "$EXIT" -ne '0' && ! "$OUTPUT" =~ incorrect\ password ]] && {
+		if ! OUTPUT="`echo -e "${REPLY}\n" | sudo -Sv 2>&1`" && [[ ! "$OUTPUT" =~ incorrect\ password ]]; then
 			while :; do
 				echo -n '* [ROOT] '
-				if su - -c "echo $'\n# Only tests\n127.0.0.1\tncd.xyz\n127.0.0.1\twww.ncd.xyz' >> '/etc/hosts'"; then break; fi
+				if su - -c "echo $'\n# Only tests\n127.0.0.1\tncd.xyz\n127.0.0.1\twww.ncd.xyz' >> '/etc/hosts'"; then
+					break
+				fi
 			done
-		} || {
+		else
 			while :; do
-				if $SUDO tee -a '/etc/hosts' >'/dev/null' <<< $'\n# Only tests\n127.0.0.1\tncd.xyz\n127.0.0.1\twww.ncd.xyz'; then break; fi
+				if sudo tee -a '/etc/hosts' >'/dev/null' <<< $'\n# Only tests\n127.0.0.1\tncd.xyz\n127.0.0.1\twww.ncd.xyz'; then
+					break
+				fi
 			done
-		}
+		fi
 	} || setup-domains-array
 }
 
