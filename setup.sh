@@ -15,7 +15,7 @@ git clone -q 'https://github.com/rhuanpk/ncd.git'
 sed -i 's/^git clone/#&/' "$0"
 cd './ncd/'
 for status in `git status --porcelain | sed -n 's/^.\(.\).*$/\1/;{/^\(M\|\?\)/p}' | sort -u`; do
-	[[ "$status" = '?' && -d './project/certbot/conf/live/' ]] && {
+	[[ "$status" = '?' && -d './project/certbot/' && -d './project/nginx/conf/' ]] && {
 		read -p '* Certs already exists, gens in different way (delete existing)? (y/N) '
 		[ "${REPLY,,}" = 'y' ] && {
 			sudo -k 2>&-
@@ -49,7 +49,7 @@ for status in `git status --porcelain | sed -n 's/^.\(.\).*$/\1/;{/^\(M\|\?\)/p}
 					if ! "${HAS_ERROR:-false}"; then break; fi
 				done
 			fi
-			git clean -f 'project/certbot/' 'project/nginx/conf/' 'source/'
+			git clean -f 'project/certbot/' 'project/nginx/conf/'
 			if "${HAS_ERROR:-false}"; then
 				echo '! Some error occurred, try on your own: git clean -f ./'
 				exit 1
@@ -58,7 +58,10 @@ for status in `git status --porcelain | sed -n 's/^.\(.\).*$/\1/;{/^\(M\|\?\)/p}
 	}
 	[ "$status" = 'M' ] && {
 		read -p '* Config files are modified, reset? (Y/n) '
-		[ "${REPLY,,}" != 'n' ] && git restore --worktree ./
+		[ "${REPLY,,}" != 'n' ] && {
+			git restore --worktree ./
+			git clean -f 'source/'
+		}
 	}
 done
 
